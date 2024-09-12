@@ -3,94 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HiqMobi Conversions</title>
+    <title>Send Message to Telegram Bot</title>
     <style>
         body {
+            background: linear-gradient(135deg, #ff007f, #0073ff);
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        table {
+        .top-banner {
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            padding: 15px 20px;
+            border-bottom: 2px solid #ddd;
+            position: fixed;
+            top: 0;
             width: 100%;
-            border-collapse: collapse;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .top-banner .home-icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            fill: #0073ff;
+        }
+        .top-banner .brand-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            flex: 1;
+        }
+        .top-banner .menu-icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            fill: #0073ff;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+            margin: 80px auto; /* Adjusted for space under the top banner */
+        }
+        input[type="text"], input[type="submit"], button {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin: 10px auto;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            display: block;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #66a6ff;
+            color: white;
+            cursor: pointer;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            width: auto;
+            max-width: 100%;
+        }
+        input[type="submit"]:hover {
+            background-color: #89f7fe;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            text-align: center;
+        }
+        .popup h2 {
+            margin: 0;
+        }
+        .terms {
             margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+            border: 2px solid #ddd; /* Increased border size */
+            border-radius: 5px;
+            padding: 15px;
+            box-sizing: border-box;
         }
-        table, th, td {
-            border: 1px solid #ddd;
+        .telegram-button {
+            display: block;
+            width: 150px;
+            padding: 10px;
+            margin: 20px auto;
+            background-color: #0073ff;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
         }
-        th, td {
-            padding: 8px;
-            text-align: left;
+        .telegram-button:hover {
+            background-color: #005bb5;
         }
-        th {
-            background-color: #f2f2f2;
-        }
-        .loading {
-            color: blue;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
+        .details {
+            margin: 20px auto;
+            font-size: 18px;
+            color: #333;
+            max-width: 300px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
+    <div class="top-banner">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Menu_icon_%28simple%29.svg/1024px-Menu_icon_%28simple%29.svg.png" alt="Home" class="home-icon" onclick="window.location.href='logi.html'">
+        <div class="brand-name" id="detailsDisplay"></div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Menu_icon_%28simple%29.svg/1024px-Menu_icon_%28simple%29.svg.png" alt="Menu" class="menu-icon" onclick="window.location.href='login.html'">
+    </div>
 
-    <h1>HiqMobi Conversions</h1>
-    <button id="fetchBtn">Fetch Conversions</button>
-    <div id="message"></div>
-    <table id="conversionTable">
-        <thead>
-            <tr>
-                <th>IP</th>
-                <th>Goal Name</th>
-                <th>Offer ID</th>
-                <th>Click ID</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div class="form-container">
+        <h1>Enter Your Details</h1>
+        <form id="telegramForm">
+            <input type="text" id="upiId" name="upiId" placeholder="Enter your UPI ID" required><br>
+            <input type="submit" value="Submit">
+            <div class="terms">
+                <p><strong>Offer Terms and Conditions:</strong></p>
+                <p>1. Offer valid only once per User/UPI-Id/IP address and Device.</p>
+                <p>2. Multiple registrations from same user/UPI-Id/IP address, similar looking usernames and e-mail IDs and Device will not be paid.</p>
+                <p>3. Use only Real Indian Mobile Numbers and genuine mail ID to register in the app.</p>
+                <p>4. Merchant verifies your account, if they find any Duplicate or Suspicious transaction, then your cashback may get rejected.</p>
+                <p>5. Any query related to Cashback will be entertained by Camplus Team. Write email to mail@camplus.com</p>
+            </div>
+        </form>
+    </div>
+
+    <a href="https://t.me/secret_earnings" target="_blank" class="telegram-button">Join on Telegram</a>
+
+    <div class="popup" id="redirectPopup">
+        <h2>Redirecting...</h2>
+    </div>
 
     <script>
-        const apiUrl = 'https://api.hiqmobi.com/api/conversion?api_token=nvqyurckedgax0ajn3x0m5nlehmpk02e5yh4&page=1&limit=10';
-        
-        document.getElementById('fetchBtn').addEventListener('click', fetchConversions);
+        const botToken = '7427071280:AAEk9zB9fVYOeWm0_ahwT53S5n8XPczePiQ';
+        const chatId = '7094705343';
 
-        async function fetchConversions() {
-            const messageDiv = document.getElementById('message');
-            const tableBody = document.querySelector('#conversionTable tbody');
-            messageDiv.innerHTML = '<p class="loading">Loading...</p>';
-            tableBody.innerHTML = ''; // Clear previous data
-
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                messageDiv.innerHTML = '';
-
-                if (data.success && data.data.length > 0) {
-                    const conversions = data.data;
-                    conversions.forEach(conversion => {
-                        const row = `<tr>
-                            <td>${conversion.ip}</td>
-                            <td>${conversion.goalName}</td>
-                            <td>${conversion.offerid}</td>
-                            <td>${conversion.clickid}</td>
-                        </tr>`;
-                        tableBody.insertAdjacentHTML('beforeend', row);
-                    });
-                } else {
-                    messageDiv.innerHTML = '<p class="error">No conversions found.</p>';
-                }
-            } catch (error) {
-                messageDiv.innerHTML = `<p class="error">Error fetching conversions: ${error.message}</p>`;
-            }
+        function getStoredRedirectUrl() {
+            return localStorage.getItem('redirectUrl') || 'https://link.hiqmobi.com/go/198/304';
         }
-    </script>
 
+        function getUserIP() {
+            return fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => data.ip)
+                .catch(error => {
+                    console.error('Error fetching IP address:', error);
+                    return 'IP not available';
+                });
+        }
+
+        function updateDetailsDisplay() {
+            const name = localStorage.getItem('name') || 'Tataneu';
+            const payout = localStorage.getItem('payout') || '10';
+            const detailsDisplay = document.getElementById('detailsDisplay');
+            detailsDisplay.textContent = `${name} - ₹${payout}`;
+        }
+
+        document.getElementById('telegramForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const upiId = document.getElementById('upiId').value;
+            const name = localStorage.getItem('name') || 'Tataneu';  // Default name if not found
+            const payout = localStorage.getItem('payout') || '10';   // Default payout if not found
+
+            getUserIP().then(ipAddress => {
+                // Construct the full message to send to the Telegram bot
+                const fullMessage = `Name: ${name}\nPayout: ₹${payout}\nUPI ID: ${upiId}\nUser IP: ${ipAddress}`;
+
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: fullMessage
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        // Display popup and redirect after 1 second
+                        document.getElementById('redirectPopup').style.display = 'block';
+
+                        setTimeout(function() {
+                            window.location.href = getStoredRedirectUrl();
+                        }, 1000);
+                    } else {
+                        alert('Error sending message');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error sending message');
+                });
+
+                // Clear the input field after submission
+                document.getElementById('upiId').value = '';
+            });
+        });
+
+        // Update details display on page load
+        updateDetailsDisplay();
+    </script>
 </body>
 </html>
