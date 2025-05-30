@@ -1,92 +1,259 @@
-<?php
-// HiqMobi API URL
-$apiUrl = 'https://api.hiqmobi.com/api/conversion?api_token=nvqyurckedgax0ajn3x0m5nlehmpk02e5yh4&page=1&limit=10';
-
-// Function to fetch data from HiqMobi API
-function fetchConversions($url) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    // Decode the JSON response into a PHP array
-    return json_decode($response, true);
-}
-
-// Fetch the conversions
-$data = fetchConversions($apiUrl);
-
-// Check if the API call was successful and data is available
-if (isset($data['success']) && $data['success'] == true) {
-    $conversions = $data['data']; // Array of conversion data
-} else {
-    $conversions = [];
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HiqMobi Conversions - Admin Panel</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monthly FRC Tracker</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    tbody tr:nth-child(odd) { background-color: #ffffff; }
+    tbody tr:nth-child(even) { background-color: #f5f5f5; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #eef3f8;
+      margin: 0;
+      padding: 0;
+    }
+    input[type="date"] {
+      font-size: 12px;
+      border: none;
+      background: transparent;
+      padding: 3px;
+      color: #007bff;
+      text-align: center;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+    }
+    .container {
+      min-width: 550px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background-color: #f0f2f5;
+      z-index: 1;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+    }
+    input { flex: 2; }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover { background: #0056b3; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px 5px;
+      text-align: center;
+      font-size: 14px;
+      word-break: break-word;
+    }
+    th { background: #f0f2f5; }
+    .violet { color: violet; }
+    .blue { color: blue; }
+    .indigo { color: indigo; }
+    .yellow { color: goldenrod; }
+    .green { color: green; }
+    .red { color: red; }
+    .black { color: black; }
+    .month-header {
+      background-color: #dbeaff;
+      font-weight: bold;
+      text-align: center;
+    }
+    select {
+      border: none;
+      background: transparent;
+      appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 5px center;
+      padding-right: 25px;
+    }
+    select:focus { outline: none; }
+    @media screen and (max-width: 500px) {
+      th, td { font-size: 13px; padding: 8px 3px; }
+      input, button { font-size: 14px; }
+      .container { margin: 10px; padding: 15px; }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Monthly FRC Tracker</h2>
+    <form id="entryForm">
+      <input type="text" id="name" placeholder="Customer Name" required />
+      <button type="submit">Add</button>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Name</th>
+          <th>UPC</th>
+          <th>Portal</th>
+          <th>FRC</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="entryList"></tbody>
+    </table>
+  </div>
 
-    <h1>HiqMobi Conversions - Admin Panel</h1>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8mlQK0s0myUHGZJrbtRRHChJorea2Tsc",
+      authDomain: "faaizy-738f0.firebaseapp.com",
+      databaseURL: "https://faaizy-738f0-default-rtdb.firebaseio.com",
+      projectId: "faaizy-738f0",
+      storageBucket: "faaizy-738f0.appspot.com",
+      messagingSenderId: "896828206030",
+      appId: "1:896828206030:web:f86fcea23793ef806a199f"
+    };
 
-    <?php if (empty($conversions)): ?>
-        <p class="error">No conversions found or error fetching data from HiqMobi API.</p>
-    <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>IP Address</th>
-                    <th>Goal Name</th>
-                    <th>Offer ID</th>
-                    <th>Click ID</th>
-                    <th>Payout</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($conversions as $conversion): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($conversion['ip']); ?></td>
-                        <td><?php echo htmlspecialchars($conversion['goalName']); ?></td>
-                        <td><?php echo htmlspecialchars($conversion['offerid']); ?></td>
-                        <td><?php echo htmlspecialchars($conversion['clickid']); ?></td>
-                        <td><?php echo htmlspecialchars($conversion['payout']); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
+    const form = document.getElementById("entryForm");
+    const entryList = document.getElementById("entryList");
+
+    function getMonthYear(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleString('default', { month: 'long', year: 'numeric' });
+    }
+
+    function getColorClass(type, value) {
+      const map = {
+        frc: { "₹299": "violet", "₹301": "blue", "₹349": "indigo" },
+        status: { Pending: "yellow", Success: "green" },
+        upc: { Validated: "green", Supported: "blue" },
+        portal: { JIO: "blue", Airtel: "black", VI: "red" },
+      };
+      return map[type]?.[value] || "";
+    }
+
+    function renderEntries(data) {
+      entryList.innerHTML = "";
+      const grouped = {};
+
+      Object.entries(data || {}).forEach(([id, entry]) => {
+        const month = getMonthYear(entry.date);
+        if (!grouped[month]) grouped[month] = [];
+        grouped[month].push({ ...entry, id });
+      });
+
+      Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(month => {
+        const header = document.createElement("tr");
+        const headerCell = document.createElement("td");
+        headerCell.colSpan = 7;
+        headerCell.className = "month-header";
+        headerCell.textContent = month;
+        header.appendChild(headerCell);
+        entryList.appendChild(header);
+
+        grouped[month].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((entry, i) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${i + 1}</td><td>${entry.name}</td>`;
+
+          const createSelect = (type, options, value) => {
+            const select = document.createElement("select");
+            select.className = getColorClass(type, value);
+            options.forEach(opt => {
+              const option = document.createElement("option");
+              option.value = opt;
+              option.text = opt;
+              option.className = getColorClass(type, opt);
+              if (opt === value) option.selected = true;
+              select.appendChild(option);
+            });
+            select.onchange = () => {
+              db.ref("entries/" + entry.id).update({ [type]: select.value });
+            };
+            return select;
+          };
+
+          const upcCell = document.createElement("td");
+          upcCell.appendChild(createSelect("upc", ["Supported", "Validated"], entry.upc));
+          row.appendChild(upcCell);
+
+          const portalCell = document.createElement("td");
+          portalCell.appendChild(createSelect("portal", ["VI", "Airtel", "JIO"], entry.portal));
+          row.appendChild(portalCell);
+
+          const frcCell = document.createElement("td");
+          frcCell.appendChild(createSelect("frc", ["₹299", "₹301", "₹349"], entry.frc));
+          row.appendChild(frcCell);
+
+          const statusCell = document.createElement("td");
+          statusCell.appendChild(createSelect("status", ["Pending", "Success"], entry.status));
+          row.appendChild(statusCell);
+
+          const dateCell = document.createElement("td");
+          const dateInput = document.createElement("input");
+          dateInput.type = "date";
+          dateInput.value = new Date(entry.date).toISOString().split("T")[0];
+          dateInput.onchange = () => {
+            db.ref("entries/" + entry.id).update({ date: new Date(dateInput.value).toISOString() });
+          };
+          dateCell.appendChild(dateInput);
+          row.appendChild(dateCell);
+
+          entryList.appendChild(row);
+        });
+      });
+    }
+
+    db.ref("entries").on("value", (snapshot) => {
+      renderEntries(snapshot.val());
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      if (!name) return;
+
+      const newEntryRef = db.ref("entries").push();
+      newEntryRef.set({
+        name,
+        upc: "Supported",
+        portal: "Airtel",
+        frc: "₹299",
+        status: "Pending",
+        date: new Date().toISOString()
+      });
+
+      form.reset();
+    });
+  </script>
 </body>
 </html>
