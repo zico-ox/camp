@@ -116,7 +116,7 @@
       padding-top: 60px;
     }
 
-    .sidebar open { left: 0; }
+    .sidebar.open { left: 0; }
 
     .sidebar h2 {
       font-size: 20px;
@@ -284,7 +284,7 @@
   <!-- Popup Modal -->
   <div id="popup" class="popup">
     <div class="popup-content">
-      <span class="close-btn" id="closePopupBtn">×</span>
+      <span class="close-btn" id="closePopupBtn">&times;</span>
       <h3>Add Entries</h3>
       <textarea id="popupInput" placeholder="Enter one or more values, each on a new line..."></textarea>
       <button id="submitPopup">Submit</button>
@@ -426,42 +426,33 @@
     });
 
     submitPopup.addEventListener("click", () => {
-      const lines = popupInput.value.trim().split("\n").filter(line => line.trim());
+  const lines = popupInput.value.trim().split("\n").filter(line => line.trim());
 
-      db.ref("entries").once("value").then(snapshot => {
-        const data = snapshot.val() || {};
-        const ids = Object.keys(data)
-          .map(key => parseInt(key, 10)) // Parse keys as integers
-          .filter(num => !isNaN(num)); // Filter out any non-numeric keys
+  db.ref("entries").once("value", (snapshot) => {
+    const data = snapshot.val() || {};
+    // Extract current numeric IDs
+    const ids = Object.keys(data)
+      .map(key => parseInt(key))
+      .filter(n => !isNaN(n));
+    
+    let nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
 
-        // Find the next available ID (start from 73 if max is 72)
-        let nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
-
-        const updates = {};
-        lines.forEach(name => {
-          updates[nextId.toString()] = { // Convert nextId to string for Firebase key
-            name: name.trim(),
-            upc: "Supported",
-            portal: "Airtel",
-            frc: "₹299",
-            status: "Pending",
-            date: new Date().toISOString()
-          };
-          nextId++;
-        });
-
-        return db.ref("entries").update(updates);
-      }).then(() => {
-        popup.style.display = "none";
-        popupInput.value = "";
-      }).catch(err => {
-        console.error("Error adding entries:", err);
+    lines.forEach(name => {
+      db.ref("entries/" + nextId).set({
+        name: name.trim(),
+        upc: "Supported",
+        portal: "Airtel",
+        frc: "₹299",
+        status: "Pending",
+        date: new Date().toISOString()
       });
+      nextId++; // increment for the next entry
     });
 
-    // Initialize popup state
     popup.style.display = "none";
     popupInput.value = "";
+  });
+});
   </script>
 
   <!-- HEADER SCRIPT -->
