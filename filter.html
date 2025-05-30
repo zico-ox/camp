@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filter FRC Entries</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #eef3f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 20px auto;
+      min-width: 450px;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    select, input[type="date"] {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      min-width: 130px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px 5px;
+      text-align: center;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    th {
+      background: #f0f2f5;
+    }
+
+    .violet { color: violet; }
+    .blue { color: blue; }
+    .indigo { color: indigo; }
+    .yellow { color: goldenrod; }
+    .green { color: green; }
+    .red { color: red; }
+    .black { color: black; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Filter FRC Entries</h2>
+    <div class="filters">
+      <select id="monthFilter"><option>All Months</option></select>
+      <select id="portalFilter"><option>All Portals</option></select>
+      <select id="frcFilter"><option>All FRC</option></select>
+      <select id="statusFilter"><option>All Status</option></select>
+      <select id="upcFilter"><option>All UPC</option></select>
+      <input type="date" id="fromDate" />
+      <input type="date" id="toDate" />
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Name</th>
+          <th>UPC</th>
+          <th>Portal</th>
+          <th>FRC</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="entryTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8mlQK0s0myUHGZJrbtRRHChJorea2Tsc",
+      authDomain: "faaizy-738f0.firebaseapp.com",
+      databaseURL: "https://faaizy-738f0-default-rtdb.firebaseio.com",
+      projectId: "faaizy-738f0",
+      storageBucket: "faaizy-738f0.appspot.com",
+      messagingSenderId: "896828206030",
+      appId: "1:896828206030:web:f86fcea23793ef806a199f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const tableBody = document.getElementById("entryTable");
+
+    const monthFilter = document.getElementById("monthFilter");
+    const portalFilter = document.getElementById("portalFilter");
+    const frcFilter = document.getElementById("frcFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const upcFilter = document.getElementById("upcFilter");
+    const fromDate = document.getElementById("fromDate");
+    const toDate = document.getElementById("toDate");
+
+    let allData = [];
+
+    function getMonthYear(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleString('default', { month: 'long', year: 'numeric' });
+    }
+
+    function getColorClass(type, value) {
+      if (type === 'frc') {
+        if (value === '₹299') return 'violet';
+        if (value === '₹301') return 'blue';
+        if (value === '₹349') return 'indigo';
+      }
+      if (type === 'status') {
+        if (value === 'Pending') return 'yellow';
+        if (value === 'Success') return 'green';
+      }
+      if (type === 'upc') {
+        if (value === 'Validated') return 'green';
+        if (value === 'Supported') return 'blue';
+      }
+      if (type === 'portal') {
+        if (value === 'JIO') return 'blue';
+        if (value === 'Airtel') return 'black';
+        if (value === 'VI') return 'red';
+      }
+      return '';
+    }
+
+    function populateFilters() {
+      monthFilter.innerHTML = '<option>All Months</option>';
+      portalFilter.innerHTML = '<option>All Portals</option>';
+      frcFilter.innerHTML = '<option>All FRC</option>';
+      statusFilter.innerHTML = '<option>All Status</option>';
+      upcFilter.innerHTML = '<option>All UPC</option>';
+
+      const months = new Set();
+      const portals = new Set();
+      const frcVals = new Set();
+      const statuses = new Set();
+      const upcs = new Set();
+
+      allData.forEach(entry => {
+        months.add(getMonthYear(entry.date));
+        portals.add(entry.portal);
+        frcVals.add(entry.frc);
+        statuses.add(entry.status);
+        upcs.add(entry.upc);
+      });
+
+      for (let item of [...months].sort()) monthFilter.innerHTML += `<option>${item}</option>`;
+      for (let item of [...portals].sort()) portalFilter.innerHTML += `<option>${item}</option>`;
+      for (let item of [...frcVals].sort()) frcFilter.innerHTML += `<option>${item}</option>`;
+      for (let item of [...statuses].sort()) statusFilter.innerHTML += `<option>${item}</option>`;
+      for (let item of [...upcs].sort()) upcFilter.innerHTML += `<option>${item}</option>`;
+    }
+
+    function filterData() {
+      const filtered = allData.filter(entry => {
+        const entryDate = new Date(entry.date);
+        const entryMonth = getMonthYear(entry.date);
+
+        const from = fromDate.value ? new Date(fromDate.value) : null;
+        const to = toDate.value ? new Date(toDate.value) : null;
+
+        return (
+          (monthFilter.value === 'All Months' || monthFilter.value === entryMonth) &&
+          (portalFilter.value === 'All Portals' || portalFilter.value === entry.portal) &&
+          (frcFilter.value === 'All FRC' || frcFilter.value === entry.frc) &&
+          (statusFilter.value === 'All Status' || statusFilter.value === entry.status) &&
+          (upcFilter.value === 'All UPC' || upcFilter.value === entry.upc) &&
+          (!from || entryDate >= from) &&
+          (!to || entryDate <= to)
+        );
+      });
+
+      renderTable(filtered);
+    }
+
+    function renderTable(entries) {
+      tableBody.innerHTML = "";
+      entries.forEach((entry, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${entry.name}</td>
+          <td class="${getColorClass('upc', entry.upc)}">${entry.upc}</td>
+          <td class="${getColorClass('portal', entry.portal)}">${entry.portal}</td>
+          <td class="${getColorClass('frc', entry.frc)}">${entry.frc}</td>
+          <td class="${getColorClass('status', entry.status)}">${entry.status}</td>
+          <td>${new Date(entry.date).toLocaleDateString()}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    [monthFilter, portalFilter, frcFilter, statusFilter, upcFilter, fromDate, toDate].forEach(el => {
+      el.addEventListener("change", filterData);
+    });
+
+    onValue(ref(db, 'entries'), (snapshot) => {
+      const raw = snapshot.val();
+      allData = raw ? Object.values(raw) : [];
+      populateFilters();
+      filterData();
+    });
+  </script>
+</body>
+</html>
