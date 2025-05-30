@@ -426,20 +426,33 @@
     });
 
     submitPopup.addEventListener("click", () => {
-      const lines = popupInput.value.trim().split("\n").filter(line => line.trim());
-      lines.forEach(name => {
-        db.ref("entries").push({
-          name: name.trim(),
-          upc: "Supported",
-          portal: "Airtel",
-          frc: "₹299",
-          status: "Pending",
-          date: new Date().toISOString()
-        });
+  const lines = popupInput.value.trim().split("\n").filter(line => line.trim());
+
+  db.ref("entries").once("value", (snapshot) => {
+    const data = snapshot.val() || {};
+    // Extract current numeric IDs
+    const ids = Object.keys(data)
+      .map(key => parseInt(key))
+      .filter(n => !isNaN(n));
+    
+    let nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+
+    lines.forEach(name => {
+      db.ref("entries/" + nextId).set({
+        name: name.trim(),
+        upc: "Supported",
+        portal: "Airtel",
+        frc: "₹299",
+        status: "Pending",
+        date: new Date().toISOString()
       });
-      popup.style.display = "none";
-      popupInput.value = "";
+      nextId++; // increment for the next entry
     });
+
+    popup.style.display = "none";
+    popupInput.value = "";
+  });
+});
   </script>
 
   <!-- HEADER SCRIPT -->
