@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Delete Entries</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    button {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #b02a37;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Delete FRC Entry</h2>
+    <ul id="deleteList"></ul>
+  </div>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8mlQK0s0myUHGZJrbtRRHChJorea2Tsc",
+      authDomain: "faaizy-738f0.firebaseapp.com",
+      databaseURL: "https://faaizy-738f0-default-rtdb.firebaseio.com",
+      projectId: "faaizy-738f0",
+      storageBucket: "faaizy-738f0.appspot.com",
+      messagingSenderId: "896828206030",
+      appId: "1:896828206030:web:f86fcea23793ef806a199f"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const deleteList = document.getElementById("deleteList");
+
+    // Load entries from Firebase
+    function loadEntries() {
+      db.ref("entries").on("value", (snapshot) => {
+        const data = snapshot.val();
+        renderList(data);
+      });
+    }
+
+    function renderList(data) {
+      deleteList.innerHTML = "";
+      if (!data) {
+        deleteList.innerHTML = "<li>No entries to delete.</li>";
+        return;
+      }
+
+      const entries = Object.entries(data); // [ [id, entry], ... ]
+
+      entries.forEach(([id, entry], index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span>Entry #${index + 1} - ${entry.name}</span>
+          <button onclick="deleteEntry('${id}')">Delete</button>
+        `;
+        deleteList.appendChild(li);
+      });
+    }
+
+    function deleteEntry(id) {
+      if (confirm("Are you sure you want to delete this entry?")) {
+        db.ref("entries/" + id).remove();
+      }
+    }
+
+    loadEntries();
+  </script>
+</body>
+</html>
