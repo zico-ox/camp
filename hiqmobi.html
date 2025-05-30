@@ -1,238 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Message to Telegram Bot</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #ff007f, #0073ff);
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        .top-banner {
-            background: linear-gradient(135deg, #ffffff, #f0f0f0);
-            padding: 15px 20px;
-            border-bottom: 2px solid #ddd;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .top-banner .home-icon {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            fill: #0073ff;
-        }
-        .top-banner .brand-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            flex: 1;
-        }
-        .top-banner .menu-icon {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            fill: #0073ff;
-        }
-        .form-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            width: 300px;
-            margin: 80px auto; /* Adjusted for space under the top banner */
-        }
-        input[type="text"], input[type="submit"], button {
-            width: calc(100% - 22px);
-            padding: 12px;
-            margin: 10px auto;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            display: block;
-            box-sizing: border-box;
-        }
-        input[type="submit"] {
-            background-color: #66a6ff;
-            color: white;
-            cursor: pointer;
-            border: none;
-            padding: 15px;
-            font-size: 16px;
-            width: auto;
-            max-width: 100%;
-        }
-        input[type="submit"]:hover {
-            background-color: #89f7fe;
-        }
-        h1 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: #333;
-        }
-        .popup {
-            display: none;
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            text-align: center;
-        }
-        .popup h2 {
-            margin: 0;
-        }
-        .terms {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #555;
-            text-align: center;
-            border: 2px solid #ddd; /* Increased border size */
-            border-radius: 5px;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-        .telegram-button {
-            display: block;
-            width: 150px;
-            padding: 10px;
-            margin: 20px auto;
-            background-color: #0073ff;
-            color: white;
-            text-align: center;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .telegram-button:hover {
-            background-color: #005bb5;
-        }
-        .details {
-            margin: 20px auto;
-            font-size: 18px;
-            color: #333;
-            max-width: 300px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monthly FRC Tracker</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    tbody tr:nth-child(odd) { background-color: #ffffff; }
+    tbody tr:nth-child(even) { background-color: #f5f5f5; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #eef3f8;
+      margin: 0;
+      padding: 0;
+    }
+    input[type="date"] {
+      font-size: 12px;
+      border: none;
+      background: transparent;
+      padding: 3px;
+      color: #007bff;
+      text-align: center;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+    }
+    .container {
+      min-width: 550px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background-color: #f0f2f5;
+      z-index: 1;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+    }
+    input { flex: 2; }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover { background: #0056b3; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px 5px;
+      text-align: center;
+      font-size: 14px;
+      word-break: break-word;
+    }
+    th { background: #f0f2f5; }
+    .violet { color: violet; }
+    .blue { color: blue; }
+    .indigo { color: indigo; }
+    .yellow { color: goldenrod; }
+    .green { color: green; }
+    .red { color: red; }
+    .black { color: black; }
+    .month-header {
+      background-color: #dbeaff;
+      font-weight: bold;
+      text-align: center;
+    }
+    select {
+      border: none;
+      background: transparent;
+      appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 5px center;
+      padding-right: 25px;
+    }
+    select:focus { outline: none; }
+    @media screen and (max-width: 500px) {
+      th, td { font-size: 13px; padding: 8px 3px; }
+      input, button { font-size: 14px; }
+      .container { margin: 10px; padding: 15px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="top-banner">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Menu_icon_%28simple%29.svg/1024px-Menu_icon_%28simple%29.svg.png" alt="Home" class="home-icon" onclick="window.location.href='logi.html'">
-        <div class="brand-name" id="detailsDisplay"></div>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Menu_icon_%28simple%29.svg/1024px-Menu_icon_%28simple%29.svg.png" alt="Menu" class="menu-icon" onclick="window.location.href='login.html'">
-    </div>
+  <div class="container">
+    <h2>Monthly FRC Tracker</h2>
+    <form id="entryForm">
+      <input type="text" id="name" placeholder="Customer Name" required />
+      <button type="submit">Add</button>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Name</th>
+          <th>UPC</th>
+          <th>Portal</th>
+          <th>FRC</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="entryList"></tbody>
+    </table>
+  </div>
 
-    <div class="form-container">
-        <h1>Enter Your Details</h1>
-        <form id="telegramForm">
-            <input type="text" id="upiId" name="upiId" placeholder="Enter your UPI ID" required><br>
-            <input type="submit" value="Submit">
-            <div class="terms">
-                <p><strong>Offer Terms and Conditions:</strong></p>
-                <p>1. Offer valid only once per User/UPI-Id/IP address and Device.</p>
-                <p>2. Multiple registrations from same user/UPI-Id/IP address, similar looking usernames and e-mail IDs and Device will not be paid.</p>
-                <p>3. Use only Real Indian Mobile Numbers and genuine mail ID to register in the app.</p>
-                <p>4. Merchant verifies your account, if they find any Duplicate or Suspicious transaction, then your cashback may get rejected.</p>
-                <p>5. Any query related to Cashback will be entertained by Camplus Team. Write email to mail@camplus.com</p>
-            </div>
-        </form>
-    </div>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8mlQK0s0myUHGZJrbtRRHChJorea2Tsc",
+      authDomain: "faaizy-738f0.firebaseapp.com",
+      databaseURL: "https://faaizy-738f0-default-rtdb.firebaseio.com",
+      projectId: "faaizy-738f0",
+      storageBucket: "faaizy-738f0.appspot.com",
+      messagingSenderId: "896828206030",
+      appId: "1:896828206030:web:f86fcea23793ef806a199f"
+    };
 
-    <a href="https://t.me/secret_earnings" target="_blank" class="telegram-button">Join on Telegram</a>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    <div class="popup" id="redirectPopup">
-        <h2>Redirecting...</h2>
-    </div>
+    const form = document.getElementById("entryForm");
+    const entryList = document.getElementById("entryList");
 
-    <script>
-        const botToken = '7427071280:AAEk9zB9fVYOeWm0_ahwT53S5n8XPczePiQ';
-        const chatId = '7094705343';
+    function getMonthYear(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleString('default', { month: 'long', year: 'numeric' });
+    }
 
-        function getStoredRedirectUrl() {
-            return localStorage.getItem('redirectUrl') || 'https://link.hiqmobi.com/go/48/304';
-        }
+    function getColorClass(type, value) {
+      const map = {
+        frc: { "₹299": "violet", "₹301": "blue", "₹349": "indigo" },
+        status: { Pending: "yellow", Success: "green" },
+        upc: { Validated: "green", Supported: "blue" },
+        portal: { JIO: "blue", Airtel: "black", VI: "red" },
+      };
+      return map[type]?.[value] || "";
+    }
 
-        function getUserIP() {
-            return fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => data.ip)
-                .catch(error => {
-                    console.error('Error fetching IP address:', error);
-                    return 'IP not available';
-                });
-        }
+    function renderEntries(data) {
+      entryList.innerHTML = "";
+      const grouped = {};
 
-        function updateDetailsDisplay() {
-            const name = localStorage.getItem('name') || 'Paytm Money';
-            const payout = localStorage.getItem('payout') || '150';
-            const detailsDisplay = document.getElementById('detailsDisplay');
-            detailsDisplay.textContent = `${name} - ₹${payout}`;
-        }
+      Object.entries(data || {}).forEach(([id, entry]) => {
+        const month = getMonthYear(entry.date);
+        if (!grouped[month]) grouped[month] = [];
+        grouped[month].push({ ...entry, id });
+      });
 
-        document.getElementById('telegramForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+      Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(month => {
+        const header = document.createElement("tr");
+        const headerCell = document.createElement("td");
+        headerCell.colSpan = 7;
+        headerCell.className = "month-header";
+        headerCell.textContent = month;
+        header.appendChild(headerCell);
+        entryList.appendChild(header);
 
-            const upiId = document.getElementById('upiId').value;
-            const name = localStorage.getItem('name') || 'Tataneu';  // Default name if not found
-            const payout = localStorage.getItem('payout') || '10';   // Default payout if not found
+        grouped[month].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((entry, i) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${i + 1}</td><td>${entry.name}</td>`;
 
-            getUserIP().then(ipAddress => {
-                // Construct the full message to send to the Telegram bot
-                const fullMessage = `New Click By User /Name: ${name}\nPayout: ₹${payout}\nUPI ID: ${upiId}\nUser IP: ${ipAddress}`;
-
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: fullMessage
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ok) {
-                        // Display popup and redirect after 1 second
-                        document.getElementById('redirectPopup').style.display = 'block';
-
-                        setTimeout(function() {
-                            window.location.href = getStoredRedirectUrl();
-                        }, 1000);
-                    } else {
-                        alert('Error sending message');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error sending message');
-                });
-
-                // Clear the input field after submission
-                document.getElementById('upiId').value = '';
+          const createSelect = (type, options, value) => {
+            const select = document.createElement("select");
+            select.className = getColorClass(type, value);
+            options.forEach(opt => {
+              const option = document.createElement("option");
+              option.value = opt;
+              option.text = opt;
+              option.className = getColorClass(type, opt);
+              if (opt === value) option.selected = true;
+              select.appendChild(option);
             });
-        });
+            select.onchange = () => {
+              db.ref("entries/" + entry.id).update({ [type]: select.value });
+            };
+            return select;
+          };
 
-        // Update details display on page load
-        updateDetailsDisplay();
-    </script>
+          const upcCell = document.createElement("td");
+          upcCell.appendChild(createSelect("upc", ["Supported", "Validated"], entry.upc));
+          row.appendChild(upcCell);
+
+          const portalCell = document.createElement("td");
+          portalCell.appendChild(createSelect("portal", ["VI", "Airtel", "JIO"], entry.portal));
+          row.appendChild(portalCell);
+
+          const frcCell = document.createElement("td");
+          frcCell.appendChild(createSelect("frc", ["₹299", "₹301", "₹349"], entry.frc));
+          row.appendChild(frcCell);
+
+          const statusCell = document.createElement("td");
+          statusCell.appendChild(createSelect("status", ["Pending", "Success"], entry.status));
+          row.appendChild(statusCell);
+
+          const dateCell = document.createElement("td");
+          const dateInput = document.createElement("input");
+          dateInput.type = "date";
+          dateInput.value = new Date(entry.date).toISOString().split("T")[0];
+          dateInput.onchange = () => {
+            db.ref("entries/" + entry.id).update({ date: new Date(dateInput.value).toISOString() });
+          };
+          dateCell.appendChild(dateInput);
+          row.appendChild(dateCell);
+
+          entryList.appendChild(row);
+        });
+      });
+    }
+
+    db.ref("entries").on("value", (snapshot) => {
+      renderEntries(snapshot.val());
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      if (!name) return;
+
+      const newEntryRef = db.ref("entries").push();
+      newEntryRef.set({
+        name,
+        upc: "Supported",
+        portal: "Airtel",
+        frc: "₹299",
+        status: "Pending",
+        date: new Date().toISOString()
+      });
+
+      form.reset();
+    });
+  </script>
 </body>
 </html>
