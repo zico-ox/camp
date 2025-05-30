@@ -53,9 +53,99 @@
     button:hover {
       background: #b02a37;
     }
+    /* Global Reset & Font */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f0f2f5;
+}
+
+/* Header */
+.header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.welcome-text {
+  font-size: 18px;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100%;
+  background-color: #34495e;
+  color: white;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  padding-top: 60px;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  padding: 20px;
+  border-bottom: 1px solid #44586a;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 20px;
+}
+
+.sidebar-menu li {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-bottom: 1px solid #44586a;
+  cursor: pointer;
+}
+
+.sidebar-menu li:hover {
+  background-color: #44586a;
+}
+
+/* Overlay for Sidebar */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
   </style>
 </head>
 <body>
+  <div id="header-container"></div>
   <div class="container">
     <h2>Delete FRC Entry</h2>
     <ul id="deleteList"></ul>
@@ -113,5 +203,24 @@
 
     loadEntries();
   </script>
+  <script>
+  // Load shared header
+  fetch('header.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('header-container').innerHTML = data;
+
+      // Enable menu toggle
+      document.querySelector('.menu-btn').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('open');
+        document.querySelector('.overlay').classList.toggle('active');
+      });
+
+      document.querySelector('.overlay').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.remove('open');
+        document.querySelector('.overlay').classList.remove('active');
+      });
+    });
+</script>
 </body>
 </html>
