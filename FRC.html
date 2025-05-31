@@ -291,170 +291,181 @@
     </div>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB8mlQK0s0myUHGZJrbtRRHChJorea2Tsc",
-      authDomain: "faaizy-738f0.firebaseapp.com",
-      databaseURL: "https://faaizy-738f0-default-rtdb.firebaseio.com",
-      projectId: "faaizy-738f0",
-      storageBucket: "faaizy-738f0.appspot.com",
-      messagingSenderId: "896828206030",
-      appId: "1:896828206030:web:f86fcea23793ef806a199f"
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB8mlQK0s0myUHGZJrbtRRHChJorea2Tsc",
+    authDomain: "faaizy-738f0.firebaseapp.com",
+    databaseURL: "https://faaizy-738f0-default-rtdb.firebaseio.com",
+    projectId: "faaizy-738f0",
+    storageBucket: "faaizy-738f0.appspot.com",
+    messagingSenderId: "896828206030",
+    appId: "1:896828206030:web:f86fcea23793ef806a199f"
+  };
+
+  const TELEGRAM_TOKEN = "7442068017:AAFyB6p7Zv1y8L9W_Eiqop7Nr4g9IM5SeS0";
+  const TELEGRAM_CHAT_ID = "1057948782";
+
+  function sendTelegramMessage(message) {
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
+    });
+  }
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const entryList = document.getElementById("entryList");
+
+  function getMonthYear(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleString('default', { month: 'long', year: 'numeric' });
+  }
+
+  function getColorClass(type, value) {
+    const map = {
+      frc: { "₹299": "violet", "₹301": "blue", "₹349": "indigo" },
+      status: { Pending: "yellow", Success: "green" },
+      upc: { Validated: "green", Supported: "blue" },
+      portal: { JIO: "blue", Airtel: "black", VI: "red" },
     };
+    return map[type]?.[value] || "";
+  }
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const entryList = document.getElementById("entryList");
+  function createSelect(type, options, value, entry) {
+    const select = document.createElement("select");
+    select.className = getColorClass(type, value);
+    options.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.text = opt;
+      option.className = getColorClass(type, opt);
+      if (opt === value) option.selected = true;
+      select.appendChild(option);
+    });
+    select.onchange = () => {
+      const oldValue = entry[type];
+      const newValue = select.value;
+      db.ref("entries/" + entry.id).update({ [type]: newValue });
+      if (oldValue !== newValue) {
+        const label = type.charAt(0).toUpperCase() + type.slice(1);
+        sendTelegramMessage(`${label} Changed Entry #${entry.id}: ${oldValue} → ${newValue}`);
+      }
+    };
+    return select;
+  }
 
-    function getMonthYear(dateStr) {
-      const d = new Date(dateStr);
-      return d.toLocaleString('default', { month: 'long', year: 'numeric' });
-    }
+  function renderEntries(data) {
+    entryList.innerHTML = "";
+    const grouped = {};
 
-    function getColorClass(type, value) {
-      const map = {
-        frc: { "₹299": "violet", "₹301": "blue", "₹349": "indigo" },
-        status: { Pending: "yellow", Success: "green" },
-        upc: { Validated: "green", Supported: "blue" },
-        portal: { JIO: "blue", Airtel: "black", VI: "red" },
-      };
-      return map[type]?.[value] || "";
-    }
-
-    function renderEntries(data) {
-      entryList.innerHTML = "";
-      const grouped = {};
-
-      Object.entries(data || {}).forEach(([id, entry]) => {
-        const month = getMonthYear(entry.date);
-        if (!grouped[month]) grouped[month] = [];
-        grouped[month].push({ ...entry, id });
-      });
-
-      Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(month => {
-        const header = document.createElement("tr");
-        const headerCell = document.createElement("td");
-        headerCell.colSpan = 7;
-        headerCell.className = "month-header";
-        headerCell.textContent = month;
-        header.appendChild(headerCell);
-        entryList.appendChild(header);
-
-        grouped[month].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((entry, i) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `<td>${i + 1}</td><td>${entry.name}</td>`;
-
-          const createSelect = (type, options, value) => {
-            const select = document.createElement("select");
-            select.className = getColorClass(type, value);
-            options.forEach(opt => {
-              const option = document.createElement("option");
-              option.value = opt;
-              option.text = opt;
-              option.className = getColorClass(type, opt);
-              if (opt === value) option.selected = true;
-              select.appendChild(option);
-            });
-            select.onchange = () => {
-              db.ref("entries/" + entry.id).update({ [type]: select.value });
-            };
-            return select;
-          };
-
-          row.appendChild((() => {
-            const td = document.createElement("td");
-            td.appendChild(createSelect("upc", ["Supported", "Validated"], entry.upc));
-            return td;
-          })());
-          row.appendChild((() => {
-            const td = document.createElement("td");
-            td.appendChild(createSelect("portal", ["VI", "Airtel", "JIO"], entry.portal));
-            return td;
-          })());
-          row.appendChild((() => {
-            const td = document.createElement("td");
-            td.appendChild(createSelect("frc", ["₹299", "₹301", "₹349"], entry.frc));
-            return td;
-          })());
-          row.appendChild((() => {
-            const td = document.createElement("td");
-            td.appendChild(createSelect("status", ["Pending", "Success"], entry.status));
-            return td;
-          })());
-          row.appendChild((() => {
-            const td = document.createElement("td");
-            const input = document.createElement("input");
-            input.type = "date";
-            input.value = new Date(entry.date).toISOString().split("T")[0];
-            input.onchange = () => {
-              db.ref("entries/" + entry.id).update({ date: new Date(input.value).toISOString() });
-            };
-            td.appendChild(input);
-            return td;
-          })());
-
-          entryList.appendChild(row);
-        });
-      });
-    }
-
-    db.ref("entries").on("value", (snapshot) => {
-      renderEntries(snapshot.val());
+    Object.entries(data || {}).forEach(([id, entry]) => {
+      const month = getMonthYear(entry.date);
+      if (!grouped[month]) grouped[month] = [];
+      grouped[month].push({ ...entry, id });
     });
 
-    // Popup logic
-    const openPopupBtn = document.getElementById("openPopupBtn");
-    const popup = document.getElementById("popup");
-    const closePopupBtn = document.getElementById("closePopupBtn");
-    const submitPopup = document.getElementById("submitPopup");
-    const popupInput = document.getElementById("popupInput");
+    Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(month => {
+      const header = document.createElement("tr");
+      const headerCell = document.createElement("td");
+      headerCell.colSpan = 7;
+      headerCell.className = "month-header";
+      headerCell.textContent = month;
+      header.appendChild(headerCell);
+      entryList.appendChild(header);
 
-    openPopupBtn.addEventListener("click", () => {
-      popup.style.display = "block";
+      grouped[month].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((entry, i) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${i + 1}</td><td>${entry.name}</td>`;
+
+        const tdUPC = document.createElement("td");
+        tdUPC.appendChild(createSelect("upc", ["Supported", "Validated"], entry.upc, entry));
+        row.appendChild(tdUPC);
+
+        const tdPortal = document.createElement("td");
+        tdPortal.appendChild(createSelect("portal", ["VI", "Airtel", "JIO"], entry.portal, entry));
+        row.appendChild(tdPortal);
+
+        const tdFRC = document.createElement("td");
+        tdFRC.appendChild(createSelect("frc", ["₹299", "₹301", "₹349"], entry.frc, entry));
+        row.appendChild(tdFRC);
+
+        const tdStatus = document.createElement("td");
+        tdStatus.appendChild(createSelect("status", ["Pending", "Success"], entry.status, entry));
+        row.appendChild(tdStatus);
+
+        const tdDate = document.createElement("td");
+        const input = document.createElement("input");
+        input.type = "date";
+        input.value = new Date(entry.date).toISOString().split("T")[0];
+        input.onchange = () => {
+          const oldDate = new Date(entry.date).toISOString().split("T")[0];
+          const newDate = input.value;
+          db.ref("entries/" + entry.id).update({ date: new Date(newDate).toISOString() });
+          if (oldDate !== newDate) {
+            sendTelegramMessage(`Date Changed Entry #${entry.id}: ${oldDate} → ${newDate}`);
+          }
+        };
+        tdDate.appendChild(input);
+        row.appendChild(tdDate);
+
+        entryList.appendChild(row);
+      });
     });
+  }
 
-    closePopupBtn.addEventListener("click", () => {
+  db.ref("entries").on("value", snapshot => {
+    const data = snapshot.val();
+    renderEntries(data);
+  });
+
+  // Add entries from popup
+  const openPopupBtn = document.getElementById("openPopupBtn");
+  const popup = document.getElementById("popup");
+  const closePopupBtn = document.getElementById("closePopupBtn");
+  const submitPopup = document.getElementById("submitPopup");
+  const popupInput = document.getElementById("popupInput");
+
+  openPopupBtn.addEventListener("click", () => {
+    popup.style.display = "block";
+  });
+
+  closePopupBtn.addEventListener("click", () => {
+    popup.style.display = "none";
+    popupInput.value = "";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === popup) {
       popup.style.display = "none";
       popupInput.value = "";
-    });
+    }
+  });
 
-    window.addEventListener("click", (e) => {
-      if (e.target === popup) {
-        popup.style.display = "none";
-        popupInput.value = "";
-      }
-    });
-
-    submitPopup.addEventListener("click", () => {
-  const lines = popupInput.value.trim().split("\n").filter(line => line.trim());
-
-  db.ref("entries").once("value", (snapshot) => {
+  submitPopup.addEventListener("click", async () => {
+    const snapshot = await db.ref("entries").once("value");
     const data = snapshot.val() || {};
-    // Extract current numeric IDs
-    const ids = Object.keys(data)
-      .map(key => parseInt(key))
-      .filter(n => !isNaN(n));
-    
+    const ids = Object.keys(data).map(key => parseInt(key)).filter(n => !isNaN(n));
     let nextId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
 
-    lines.forEach(name => {
+    const lines = popupInput.value.split("\n").map(line => line.trim()).filter(line => line);
+    for (const name of lines) {
       db.ref("entries/" + nextId).set({
-        name: name.trim(),
+        name: name,
         upc: "Supported",
         portal: "Airtel",
         frc: "₹299",
         status: "Pending",
         date: new Date().toISOString()
       });
-      nextId++; // increment for the next entry
-    });
+      sendTelegramMessage(`New Entry #${nextId}: ${name}`);
+      nextId++;
+    }
 
     popup.style.display = "none";
     popupInput.value = "";
   });
-});
-  </script>
-
+</script>
   <!-- HEADER SCRIPT -->
   <script type="module">
     fetch('header.html')
