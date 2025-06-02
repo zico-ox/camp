@@ -2,142 +2,167 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome Back Faaizy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FRC Tracker Counts + Cards</title>
   <style>
-    /* Global Reset & Font */
     * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+      margin: 0; padding: 0; box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
     body {
       background-color: #f0f2f5;
     }
-
-    /* Header */
-    .header {
-      background-color: #2c3e50;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .menu-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .welcome-text {
-      font-size: 18px;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -300px;
-      width: 300px;
-      height: 100%;
-      background-color: #34495e;
-      color: white;
-      transition: left 0.3s ease;
-      z-index: 1000;
-      padding-top: 60px;
-    }
-
-    .sidebar.open {
-      left: 0;
-    }
-
-    .sidebar h2 {
-      font-size: 20px;
-      padding: 20px;
-      border-bottom: 1px solid #44586a;
-    }
-
-    .sidebar-menu {
-      list-style: none;
-      padding: 20px;
-    }
-
-    .sidebar-menu li {
-      margin-bottom: 15px;
-      padding: 10px;
-      border-bottom: 1px solid #44586a;
-      cursor: pointer;
-    }
-
-    .sidebar-menu li:hover {
-      background-color: #44586a;
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      display: none;
-    }
-
-    .overlay.active {
-      display: block;
-    }
-
     .main-content {
-      padding: 20px;
       max-width: 1000px;
       margin: auto;
+      padding: 20px;
     }
+/* Global Reset & Font */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+body {
+  background-color: #f0f2f5;
+}
+
+/* Header */
+.header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.welcome-text {
+  font-size: 18px;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100%;
+  background-color: #34495e;
+  color: white;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  padding-top: 60px;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  padding: 20px;
+  border-bottom: 1px solid #44586a;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 20px;
+}
+
+.sidebar-menu li {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-bottom: 1px solid #44586a;
+  cursor: pointer;
+}
+
+.sidebar-menu li:hover {
+  background-color: #44586a;
+}
+
+/* Overlay for Sidebar */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+    .stats-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+h2 {
+      text-align: center;
+		padding: 10px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 15px 20px;
+      min-width: 150px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      color: #2c3e50;
+      flex-grow: 1;
+    }
     .card-container {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
       justify-content: flex-start;
+      margin-top: 10px;
     }
-
     .card {
-      background-color: white;
+      background: white;
       border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       padding: 15px;
       width: 350px;
       position: relative;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .card p {
-      font-size: 16px;
-      color: #333;
       word-wrap: break-word;
     }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: #e74c3c;
+      font-size: 18px;
+      cursor: pointer;
+    }
 
-   .delete-btn {
-  position: absolute;
-  top: 15px;
-  right: 8px;
-  background: none;
-  border: none;
-  color: #e74c3c; /* red icon color */
-  font-size: 18px;
-  cursor: pointer;
-}
     /* Floating Add Button */
     .floating-add-btn {
       position: fixed;
@@ -170,6 +195,8 @@
       gap: 10px;
       transition: bottom 0.3s ease;
       z-index: 1000;
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
     .add-card-form input {
@@ -196,29 +223,33 @@
   </style>
 </head>
 <body>
+  <!-- HEADER PLACEHOLDER -->
   <div id="header-container"></div>
-
+  <h2>DashBoard</h2>
   <div class="main-content">
+    <div class="stats-row">
+      <div class="stat-card" id="totalCount">Total: 0</div>
+      <div class="stat-card" id="airtelCount">Airtel: 0</div>
+      <div class="stat-card" id="jioCount">Jio: 0</div>
+      <div class="stat-card" id="viCount">Vi: 0</div>
+    </div>
+
     <div class="card-container" id="cardContainer"></div>
   </div>
 
   <!-- Hidden Input Form -->
   <div class="add-card-form" id="cardForm">
-    <input type="text" id="cardInput" placeholder="Enter something...">
+    <input type="text" id="cardInput" placeholder="Enter something..." />
     <button id="addCardBtn">Add</button>
   </div>
 
   <!-- Floating Add Button -->
   <button class="floating-add-btn" id="toggleFormBtn">+</button>
 
-  <div class="overlay"></div>
-
-  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, onValue, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB8mlQK0s0myUHGZJrbtRRHChJorea2Tsc",
       authDomain: "faaizy-738f0.firebaseapp.com",
@@ -231,30 +262,70 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const cardsRef = ref(db, 'cards');
 
+    const entriesRef = ref(db, 'entries'); // For counts
+    const cardsRef = ref(db, 'cards');     // For cards display
+
+    const totalCountEl = document.getElementById('totalCount');
+    const airtelCountEl = document.getElementById('airtelCount');
+    const jioCountEl = document.getElementById('jioCount');
+    const viCountEl = document.getElementById('viCount');
+    const cardContainer = document.getElementById('cardContainer');
+
+    const cardForm = document.getElementById('cardForm');
+    const toggleFormBtn = document.getElementById('toggleFormBtn');
     const cardInput = document.getElementById('cardInput');
     const addCardBtn = document.getElementById('addCardBtn');
-    const cardContainer = document.getElementById('cardContainer');
-    const toggleFormBtn = document.getElementById('toggleFormBtn');
-    const cardForm = document.getElementById('cardForm');
 
-    // Load sidebar/header
-    fetch('header.html')
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById('header-container').innerHTML = data;
-        document.querySelector('.menu-btn').addEventListener('click', () => {
-          document.querySelector('.sidebar').classList.toggle('open');
-          document.querySelector('.overlay').classList.toggle('active');
-        });
-        document.querySelector('.overlay').addEventListener('click', () => {
-          document.querySelector('.sidebar').classList.remove('open');
-          document.querySelector('.overlay').classList.remove('active');
-        });
+    // Load entries to calculate counts
+    onValue(entriesRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      let total = 0, airtel = 0, jio = 0, vi = 0;
+
+      Object.values(data).forEach(entry => {
+        total++;
+        const portal = (entry.portal || '').toLowerCase();
+        if (portal.includes('airtel')) airtel++;
+        else if (portal.includes('jio')) jio++;
+        else if (portal.includes('vi')) vi++;
       });
 
-    // Toggle input form visibility
+      totalCountEl.textContent = `Total: ${total}`;
+      airtelCountEl.textContent = `Airtel: ${airtel}`;
+      jioCountEl.textContent = `Jio: ${jio}`;
+      viCountEl.textContent = `Vi: ${vi}`;
+    });
+
+    // Load cards from /cards
+    onValue(cardsRef, (snapshot) => {
+  const data = snapshot.val() || {};
+  cardContainer.innerHTML = '';
+
+  // Convert entries to array and reverse for newest first
+  const entries = Object.entries(data).reverse();
+
+  entries.forEach(([id, card]) => {
+    const cardText = card.text || JSON.stringify(card);
+
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    cardDiv.id = id;
+    cardDiv.innerHTML = `
+      <button class="delete-btn" onclick="deleteCard('${id}')">¢</button>
+      <p>${cardText}</p>
+    `;
+    cardContainer.appendChild(cardDiv);
+  });
+});
+
+    // Delete card function
+    window.deleteCard = function(id) {
+      if (confirm('Delete this card?')) {
+        remove(ref(db, 'cards/' + id));
+      }
+    };
+
+    // Toggle form visibility
     toggleFormBtn.addEventListener('click', () => {
       cardForm.classList.toggle('active');
       if (cardForm.classList.contains('active')) {
@@ -262,7 +333,7 @@
       }
     });
 
-    // Add new card
+    // Add new card function
     addCardBtn.addEventListener('click', addCard);
     cardInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') addCard();
@@ -272,35 +343,35 @@
       const text = cardInput.value.trim();
       if (!text) return;
       const newCard = { text };
-      push(cardsRef, newCard);
-      cardInput.value = '';
-      cardForm.classList.remove('active'); // Hide input form after add
+      push(cardsRef, newCard)
+        .then(() => {
+          cardInput.value = '';
+          cardForm.classList.remove('active');
+        })
+        .catch((err) => alert('Failed to add card: ' + err.message));
     }
+ </script>
 
-    // Display cards in real-time
-    onValue(cardsRef, snapshot => {
-      const cards = snapshot.val() || {};
-      cardContainer.innerHTML = '';
-      Object.entries(cards).reverse().forEach(([id, data]) => renderCard(id, data));
+<script>
+  // Load shared header
+  fetch('header.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('header-container').innerHTML = data;
+
+      // Enable menu toggle
+      document.querySelector('.menu-btn').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('open');
+        document.querySelector('.overlay').classList.toggle('active');
+      });
+
+      document.querySelector('.overlay').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.remove('open');
+        document.querySelector('.overlay').classList.remove('active');
+      });
     });
+</script>
+ 
 
-    function renderCard(id, data) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.id = id;
-      card.innerHTML = `
-        <button class="delete-btn" onclick="deleteCard('${id}')">¢</button>
-        <p>${data.text}</p>
-      `;
-      cardContainer.appendChild(card);
-    }
-
-    // Make deleteCard globally accessible
-    window.deleteCard = function(id) {
-      if (confirm("Are you sure you want to delete this item?")) {
-        remove(ref(db, `cards/${id}`));
-      }
-    };
-  </script>
 </body>
 </html>
