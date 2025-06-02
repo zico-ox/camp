@@ -74,8 +74,9 @@
     .black { color: black; }
 
     .month-header {
+font-size: 8px;
       background-color: #dbeaff;
-      font-weight: bold;
+      
       text-align: center;
     }
 
@@ -318,9 +319,13 @@
   const entryList = document.getElementById("entryList");
 
   function getMonthYear(dateStr) {
-    const d = new Date(dateStr);
-    return d.toLocaleString('default', { month: 'long', year: 'numeric' });
-  }
+  const d = new Date(dateStr);
+  const year = d.getFullYear();
+  const month = d.getMonth(); // 0-indexed
+  const key = `${year}-${month.toString().padStart(2, '0')}`;
+  const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+  return { key, label };
+}
 
   function getColorClass(type, value) {
     const map = {
@@ -356,63 +361,65 @@
   }
 
   function renderEntries(data) {
-    entryList.innerHTML = "";
-    const grouped = {};
+  entryList.innerHTML = "";
+  const grouped = {};
 
-    Object.entries(data || {}).forEach(([id, entry]) => {
-      const month = getMonthYear(entry.date);
-      if (!grouped[month]) grouped[month] = [];
-      grouped[month].push({ ...entry, id });
+  Object.entries(data || {}).forEach(([id, entry]) => {
+    const { key, label } = getMonthYear(entry.date);
+    if (!grouped[key]) grouped[key] = { label, entries: [] };
+    grouped[key].entries.push({ ...entry, id });
+  });
+
+  Object.keys(grouped).sort((a, b) => b.localeCompare(a)).forEach(key => {
+    const monthGroup = grouped[key];
+
+    const header = document.createElement("tr");
+    const headerCell = document.createElement("td");
+    headerCell.colSpan = 7;
+    headerCell.className = "month-header";
+    headerCell.textContent = monthGroup.label;
+    header.appendChild(headerCell);
+    entryList.appendChild(header);
+
+    monthGroup.entries.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((entry, i) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${i + 1}</td><td>${entry.name}</td>`;
+
+      const tdUPC = document.createElement("td");
+      tdUPC.appendChild(createSelect("upc", ["Supported", "Validated"], entry.upc, entry));
+      row.appendChild(tdUPC);
+
+      const tdPortal = document.createElement("td");
+      tdPortal.appendChild(createSelect("portal", ["VI", "Airtel", "JIO"], entry.portal, entry));
+      row.appendChild(tdPortal);
+
+      const tdFRC = document.createElement("td");
+      tdFRC.appendChild(createSelect("frc", ["₹299", "₹301", "₹349"], entry.frc, entry));
+      row.appendChild(tdFRC);
+
+      const tdStatus = document.createElement("td");
+      tdStatus.appendChild(createSelect("status", ["Pending", "Success"], entry.status, entry));
+      row.appendChild(tdStatus);
+
+      const tdDate = document.createElement("td");
+      const input = document.createElement("input");
+      input.type = "date";
+      input.value = new Date(entry.date).toISOString().split("T")[0];
+      input.onchange = () => {
+        const oldDate = new Date(entry.date).toISOString().split("T")[0];
+        const newDate = input.value;
+        db.ref("entries/" + entry.id).update({ date: new Date(newDate).toISOString() });
+        if (oldDate !== newDate) {
+          sendTelegramMessage(`Date Changed Entry #${entry.id}: ${oldDate} → ${newDate}`);
+        }
+      };
+      tdDate.appendChild(input);
+      row.appendChild(tdDate);
+
+      entryList.appendChild(row);
     });
-
-    Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(month => {
-      const header = document.createElement("tr");
-      const headerCell = document.createElement("td");
-      headerCell.colSpan = 7;
-      headerCell.className = "month-header";
-      headerCell.textContent = month;
-      header.appendChild(headerCell);
-      entryList.appendChild(header);
-
-      grouped[month].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((entry, i) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${i + 1}</td><td>${entry.name}</td>`;
-
-        const tdUPC = document.createElement("td");
-        tdUPC.appendChild(createSelect("upc", ["Supported", "Validated"], entry.upc, entry));
-        row.appendChild(tdUPC);
-
-        const tdPortal = document.createElement("td");
-        tdPortal.appendChild(createSelect("portal", ["VI", "Airtel", "JIO"], entry.portal, entry));
-        row.appendChild(tdPortal);
-
-        const tdFRC = document.createElement("td");
-        tdFRC.appendChild(createSelect("frc", ["₹299", "₹301", "₹349"], entry.frc, entry));
-        row.appendChild(tdFRC);
-
-        const tdStatus = document.createElement("td");
-        tdStatus.appendChild(createSelect("status", ["Pending", "Success"], entry.status, entry));
-        row.appendChild(tdStatus);
-
-        const tdDate = document.createElement("td");
-        const input = document.createElement("input");
-        input.type = "date";
-        input.value = new Date(entry.date).toISOString().split("T")[0];
-        input.onchange = () => {
-          const oldDate = new Date(entry.date).toISOString().split("T")[0];
-          const newDate = input.value;
-          db.ref("entries/" + entry.id).update({ date: new Date(newDate).toISOString() });
-          if (oldDate !== newDate) {
-            sendTelegramMessage(`Date Changed Entry #${entry.id}: ${oldDate} → ${newDate}`);
-          }
-        };
-        tdDate.appendChild(input);
-        row.appendChild(tdDate);
-
-        entryList.appendChild(row);
-      });
-    });
-  }
+  });
+}
 
   db.ref("entries").on("value", snapshot => {
     const data = snapshot.val();
