@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HIQMobi Conversion Data</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>HIQMobi Conversion Data</h2>
+  <table id="conversionTable">
+    <thead>
+      <tr>
+        <th>Offer ID</th>
+        <th>Click ID</th>
+        <th>Goal Name</th>
+        <th>p1</th>
+        <th>p2</th>
+        <th>p3</th>
+        <th>p4</th>
+        <th>p5</th>
+        <th>p6</th>
+        <th>IP</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows will be inserted here -->
+    </tbody>
+  </table>
+
+  <script>
+    const API_URL = "https://api.hiqmobi.com/api/conversion?api_token=nvqyurckedgax0ajn3x0m5nlehmpk02e5yh4&page=1&limit=10";
+
+    fetch(API_URL)
+      .then(response => response.json())
+      .then(result => {
+        const tableBody = document.querySelector("#conversionTable tbody");
+
+        if (result.success && result.data.length > 0) {
+          result.data.forEach(item => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${item.offerid}</td>
+              <td>${item.clickid}</td>
+              <td>${item.goalName}</td>
+              <td>${item.p1}</td>
+              <td>${item.p2}</td>
+              <td>${item.p3}</td>
+              <td>${item.p4}</td>
+              <td>${item.p5}</td>
+              <td>${item.p6}</td>
+              <td>${item.ip}</td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td colspan="10">No data available or API error: ${result.message}</td>`;
+          tableBody.appendChild(row);
+        }
+      })
+      .catch(error => {
+        const tableBody = document.querySelector("#conversionTable tbody");
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="10">Fetch error: ${error.message}</td>`;
+        tableBody.appendChild(row);
+      });
+  </script>
+
+</body>
+</html>
